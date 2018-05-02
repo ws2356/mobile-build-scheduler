@@ -19,25 +19,20 @@ async function handleTask(req, res, next) {
 
   const shellProgram = `
     cd "${DATA_VOLUME}"
-    echo cd "${DATA_VOLUME}"
     if [ ! -d '${repoName}' ] ; then
-	echo pwd
-	pwd
       git clone "${withAuth}" "${repoName}"
       echo git clone "${withAuth}" "${repoName}"
     fi
     cd "${repoName}"
-    echo cd "${repoName}"
-	echo "doing actions: ${actions}"
     ${actions}
   `;
 
   const shellProgramName = `${repoName}.sh`;
   fs.writeFile(shellProgramName, shellProgram, (err) => {
     const proc = spawn('bash', ["-x", shellProgramName]);
-	proc.stdout.on('data', (data) => {
-		console.log('stdout: ', (data || '').toString());
-	});
+  	proc.stdout.on('data', (data) => {
+  		console.log('stdout: ', (data || '').toString());
+  	});
     res.end(err ? err.message : 'ok');
   });
 }
