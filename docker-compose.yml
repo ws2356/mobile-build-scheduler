@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  redis:
+    image: "redis:alpine"
+    restart: always
+    volumes:
+      - "redis:/data"
+
+  mobile_build_scheduler:
+    build: .
+    restart: always
+    volumes:
+      - repos:/repos
+    ports:
+      - "3000:80"
+    environment:
+      - DATA_VOLUME=/repos
+      - PORT=80
+    depends_on:
+      - redis
+
+volumes:
+  redis:
+    external: true
+  repos:
+    external: true
