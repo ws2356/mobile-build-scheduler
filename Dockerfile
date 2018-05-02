@@ -1,7 +1,7 @@
 FROM node:8
 
 # Set the working directory to /app
-WORKDIR /hello-docker
+WORKDIR /mobile-build-scheduler
 
 COPY package.json .
 RUN yarn install
@@ -14,4 +14,4 @@ EXPOSE 80
 # Define environment variable
 #ENV NAME World
 
-CMD ["node", "index.js"]
+CMD ["node", "bin/www"]
