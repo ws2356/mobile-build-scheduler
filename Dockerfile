@@ -10,6 +10,6 @@ RUN cd /mobile-build-scheduler && npm install
 EXPOSE 80
 
 # Define environment variable
-#ENV NAME World
+ENV PORT 80
 
 CMD ["node", "bin/www"]
