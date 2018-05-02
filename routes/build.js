@@ -2,13 +2,15 @@ const express = require('express');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
-const { DATA_VOLUME } = config;
+const { DATA_VOLUME, REDIS_HOST } = config;
 
 const router = express.Router();
 
 (() => {
   var redis = require("redis"),
-  client = redis.createClient();
+  client = redis.createClient({
+    host: REDIS_HOST,
+  });
 
   // if you'd like to select database 3, instead of 0 (default), call
   // client.select(3, function() { /* ... */ });
