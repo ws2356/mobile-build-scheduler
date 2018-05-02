@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const { spawn } = require('child_process');
 
 const { DATA_VOLUME } = config;
@@ -25,8 +26,11 @@ async function handleTask(req, res, next) {
     ${actions}
   `;
 
-  spawn('eval', [shellProgram]);
-  res.end('ok');
+  const shellProgramName = `${repoName}.sh`;
+  fs.writeFile(shellProgramName, shellProgram, (err) => {
+    spawn('bash', [shellProgramName]);
+    res.end(err ? err.message : 'ok');
+  });
 }
 
 router.post('/', wrapAsync(handleTask));
