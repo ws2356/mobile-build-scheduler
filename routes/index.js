@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/', function(req, res, next) {
-  res.send('Wrong place!');
+  res.end('Wrong place!');
 });
 
 module.exports = router;
