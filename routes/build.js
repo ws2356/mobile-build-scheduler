@@ -12,8 +12,6 @@ async function handleTask(req, res, next) {
   res.end('ok');
 }
 /* GET users listing. */
-router.get('/', wrapAsync(handleTask));
 router.post('/', wrapAsync(handleTask));
-router.put('/', wrapAsync(handleTask));
 
 module.exports = router;
