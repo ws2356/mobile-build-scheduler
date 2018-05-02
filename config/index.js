@@ -1,5 +1,5 @@
 const { DATA_VOLUME } = process.env;
 
-modules.exports = {
+module.exports = {
   DATA_VOLUME,
 };
