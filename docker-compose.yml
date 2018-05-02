@@ -15,9 +15,9 @@ services:
     ports:
       - "3000:80"
     environment:
-      - DATA_VOLUME="/repos"
+      - DATA_VOLUME=/repos
       - PORT=80
-      - REDIS_HOST="redis://redis"
+      - REDIS_HOST=redis
     depends_on:
       - redis
 
