@@ -324,6 +324,10 @@ unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
 
+uri@0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/uri/-/uri-0.1.0.tgz#b9a95c1555528c63a08debc961e86b40edf27ddc"
+
 utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"

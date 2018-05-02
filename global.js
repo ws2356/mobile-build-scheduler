@@ -3,3 +3,5 @@ global.wrapAsync = fn => (req, res, next) => fn(req, res, next).catch((e) => {
   err.isServerError = true;
   next(err);
 });
+
+global.config = reqire('./config');
