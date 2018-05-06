@@ -1,0 +1,17 @@
+const {
+  DATA_VOLUME,
+  REDIS_HOST,
+  FIRE_HOUR = 10,
+  FIRE_MINUTE = 15,
+  FIRE_SECOND = 0,
+  FIRE_MILLISECOND = 0,
+} = process.env;
+
+module.exports = {
+  DATA_VOLUME,
+  REDIS_HOST,
+  FIRE_HOUR,
+  FIRE_MINUTE,
+  FIRE_SECOND,
+  FIRE_MILLISECOND,
+};

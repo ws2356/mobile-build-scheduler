@@ -1,0 +1,17 @@
+{
+    "extends": "airbnb-base",
+    "globals": {
+        "config": false,
+        "wrapAsync": false,
+        "_": false,
+        "appInfo": false
+    },
+    "rules": {
+        "global-require": "off",
+        "no-shadow": "off",
+        "no-await-in-loop": "off",
+        "no-console": "off",
+        "no-restricted-syntax": "off",
+        "no-continue": "off"
+    }
+}
