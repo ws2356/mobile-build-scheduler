@@ -4,6 +4,16 @@ require('./schedule');
 
 const router = express.Router();
 
+function getKey(jsonStr) {
+  try {
+    const json = JSON.parse(jsonStr);
+    return _.get(json, 'repo.repository.git_http_url');
+  } catch (error) {
+    console.error(error);
+    return '';
+  }
+}
+
 async function handleTask(req, res) {
   const { query, body: repo } = req;
   const { object_kind: type, repository: { git_http_url: gitHttpUrl } } = repo;
@@ -20,7 +30,7 @@ async function handleTask(req, res) {
 
   try {
     repo.updated_at = Date.now();
-    await redisHash.set(gitHttpUrl, { query, repo });
+    await redisHash.set(gitHttpUrl, { query, repo }, getKey);
     res.end('request handled');
   } catch (e) {
     console.error('failed to update webhook request, error: ', repo, e);

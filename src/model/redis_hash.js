@@ -18,7 +18,7 @@ function hash(str) {
 }
 
 module.exports = {
-  async set(key, value = {}) {
+  async set(key, value = {}, getKey = v => v) {
     const valueStr = JSON.stringify(value);
     const hashKey = hash(key);
     try {
@@ -28,6 +28,8 @@ module.exports = {
         const v = await redisClient.lindexAsync(hashKey, ii);
         if (v === valueStr) {
           return true;
+        } else if (getKey(v) === getKey(valueStr)) {
+          return redisClient.lsetAsync(hashKey, ii, valueStr);
         }
       }
       return redisClient.lpushAsync(hashKey, valueStr);
