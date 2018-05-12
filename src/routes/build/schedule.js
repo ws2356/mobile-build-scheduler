@@ -1,6 +1,7 @@
 const moment = require('moment');
-const redisHash = require('../../model/redis_hash');
+const buildList = require('../../model/build_req_list');
 const executeBuild = require('./executor');
+require('./sweep')();
 
 const {
   FIRE_HOUR,
@@ -33,24 +34,21 @@ function run() {
   async function execute() {
     console.log('is executing schedule, now: ', new Date());
     try {
-      const allKeys = await redisHash.allKeys();
-      for (const key of allKeys) {
-        const repos = await redisHash.get(key);
-        for (const repoStr of repos) {
-          let repoObj = {};
-          try {
-            repoObj = JSON.parse(repoStr);
-          } catch (e) {
-            console.error('failed to json parse repoStr, error: ', e);
-            continue;
-          }
-          const { query, repo } = repoObj;
-          const { updated_at: updatedAt } = repo;
-          if (updatedAt < prevTime) {
-            continue;
-          }
-          await executeBuild({ query, repo });
+      const reqs = await buildList.all();
+      for (const repoStr of reqs) {
+        let repoObj = {};
+        try {
+          repoObj = JSON.parse(repoStr);
+        } catch (e) {
+          console.error('failed to json parse repoStr, error: ', e);
+          continue;
         }
+        const { query, repo } = repoObj;
+        const { created_at: updatedAt } = repo;
+        if (updatedAt < prevTime) {
+          continue;
+        }
+        await executeBuild({ query, repo });
       }
     } catch (e) {
       console.error(e);

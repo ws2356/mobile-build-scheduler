@@ -1,22 +1,12 @@
 const express = require('express');
-const redisHash = require('../../model/redis_hash');
+const buildList = require('../../model/build_req_list');
 require('./schedule');
 
 const router = express.Router();
 
-function getKey(jsonStr) {
-  try {
-    const json = JSON.parse(jsonStr);
-    return _.get(json, 'repo.repository.git_http_url');
-  } catch (error) {
-    console.error(error);
-    return '';
-  }
-}
-
 async function handleTask(req, res) {
   const { query, body: repo } = req;
-  const { object_kind: type, repository: { git_http_url: gitHttpUrl } } = repo;
+  const { object_kind: type } = repo;
   if (type !== 'push' && type !== 'tag_push') {
     res.status(400).end('webhook type not supported');
     return;
@@ -29,8 +19,8 @@ async function handleTask(req, res) {
   }
 
   try {
-    repo.updated_at = Date.now();
-    await redisHash.set(gitHttpUrl, { query, repo }, getKey);
+    repo.created_at = Date.now();
+    await buildList.push({ query, repo });
     res.end('request handled');
   } catch (e) {
     console.error('failed to update webhook request, error: ', repo, e);
