@@ -3,11 +3,17 @@ const { spawn } = require('child_process');
 const { DATA_VOLUME } = config;
 
 module.exports = async function executeBuild({ query, repo }) {
-  const { repository: { git_http_url: gitHttpUrl } } = repo;
+  const { ref, repository: { git_http_url: gitHttpUrl } } = repo;
   const { actions, access_token: accessToken, account } = query;
 
   const repoName = gitHttpUrl.split('/').pop();
   const withAuth = gitHttpUrl.replace(/^(\s*http[s]?:\/\/)/, `$1${account}:${accessToken}@`);
+
+  const match = ref.match(/ref\/(heads|tags)\/(.+)/);
+  const branchOrTag = match && match[2];
+  if (!branchOrTag) {
+    return;
+  }
 
   const shellProgram = `
     cd "${DATA_VOLUME}"
@@ -17,6 +23,8 @@ module.exports = async function executeBuild({ query, repo }) {
     fi
     cd "${repoName}"
     pwd
+    git reset --hard
+    git checkout "${branchOrTag}"
     echo "executing shell: ${actions}"
     ${actions}
   `;
