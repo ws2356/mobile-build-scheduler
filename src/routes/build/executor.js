@@ -12,7 +12,9 @@ module.exports = async function executeBuild({ query, repo }) {
   const match = ref.match(/ref\/(heads|tags)\/(.+)/);
   const branchOrTag = match && match[2];
   if (!branchOrTag) {
-    return;
+    console.error('invalid branch or tag extracted from ref: %s', ref);
+    console.error('repo is: %s', JSON.stringify(repo, null, 4));
+    return Promise.resolve();
   }
 
   const shellProgram = `
@@ -25,7 +27,9 @@ module.exports = async function executeBuild({ query, repo }) {
     pwd
     git reset --hard
     git checkout "${branchOrTag}"
+    git branch
     echo "executing shell: ${actions}"
+    export REF="${branchOrTag}"
     ${actions}
   `;
 

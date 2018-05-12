@@ -20,7 +20,7 @@ async function maintain() {
       if (!req) {
         break;
       }
-      const { repo: { created_at: createdAt } } = req;
+      const { repo: { created_at: createdAt } } = JSON.parse(req);
       if (now - createdAt > STALE_DURATION) {
         await shift();
       } else {
