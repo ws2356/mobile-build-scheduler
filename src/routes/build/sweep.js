@@ -22,8 +22,10 @@ async function maintain() {
       }
       const { repo: { created_at: createdAt } } = JSON.parse(req);
       if (now - createdAt > STALE_DURATION) {
+        console.log('sweep: stale remove');
         await shift();
       } else {
+        console.log('sweep: not stale, stop sweep');
         break;
       }
     }

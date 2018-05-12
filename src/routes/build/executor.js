@@ -9,7 +9,7 @@ module.exports = async function executeBuild({ query, repo }) {
   const repoName = gitHttpUrl.split('/').pop();
   const withAuth = gitHttpUrl.replace(/^(\s*http[s]?:\/\/)/, `$1${account}:${accessToken}@`);
 
-  const match = ref.match(/ref\/(heads|tags)\/(.+)/);
+  const match = ref.match(/refs\/(heads|tags)\/(.+)/);
   const branchOrTag = match && match[2];
   if (!branchOrTag) {
     console.error('invalid branch or tag extracted from ref: %s', ref);
