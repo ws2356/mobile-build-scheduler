@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { spawn } = require('child_process');
 
 const {
@@ -18,16 +19,30 @@ async function writeSSHKey() {
   echo "${ID_RSA}" > "${ID_RSA_FILE}" ;
   echo "${ID_RSA_PUB}" > "${ID_RSA_PUB_FILE}"
   `;
-  return new Promise((resolve, reject) => {
-    const proc = spawn('bash', ['-xc', shell]);
-    proc.on('close', (code) => {
-      if (!code) {
-        resolve(code);
-      } else {
-        reject(code);
-      }
+  try {
+    await Promise((resolve, reject) => {
+      const proc = spawn('bash', ['-xc', shell]);
+      proc.on('close', (code) => {
+        if (!code) {
+          resolve(code);
+        } else {
+          reject(code);
+        }
+      });
     });
-  });
+  } catch (error) {
+    console.error('failed to writeSSHKey, error: ', error);
+    return error;
+  }
+
+  try {
+    fs.chmodSync(ID_RSA_FILE, '400');
+  } catch (error) {
+    console.error('failed to chmodSync, error:', error)
+    return error;
+  }
+
+  return Promise.resolve(0);
 }
 
 module.exports = async function executeBuild({ query, repo }) {
