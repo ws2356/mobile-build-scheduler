@@ -13,6 +13,13 @@ if [ -z "${HOST_WORKDIR}" ] ; then
   export HOST_WORKDIR=${HOME}/repos
 fi
 
+authorized_keys=~/.ssh/authorized_keys 
+if [ -f "${authorized_keys}" ] ; then
+  grep "${ID_RSA_PUB}" "${authorized_keys}" || echo "${ID_RSA_PUB}" >>${authorized_keys}
+else
+  echo "${ID_RSA_PUB}" >>${authorized_keys}
+fi
+
 if [ -z "${HOST_IP}" ] ; then
   if [ "x`uname -o | grep -i 'darwin'`" != "x" ] ; then
     export HOST_IP=`ipconfig getifaddr en0`
