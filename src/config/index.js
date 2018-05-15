@@ -5,6 +5,11 @@ const {
   FIRE_MINUTE = 15,
   FIRE_SECOND = 0,
   FIRE_MILLISECOND = 0,
+  HOST_IP,
+  HOST_SSH_PORT = 22,
+  ID_RSA,
+  ID_RSA_PUB,
+  HOST_WORKDIR,
 } = process.env;
 
 module.exports = {
@@ -14,4 +19,9 @@ module.exports = {
   FIRE_MINUTE,
   FIRE_SECOND,
   FIRE_MILLISECOND,
+  HOST_IP,
+  HOST_SSH_PORT,
+  HOST_WORKDIR,
+  ID_RSA,
+  ID_RSA_PUB,
 };

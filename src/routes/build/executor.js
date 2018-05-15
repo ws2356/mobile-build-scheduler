@@ -1,6 +1,33 @@
 const { spawn } = require('child_process');
 
-const { DATA_VOLUME } = config;
+const {
+  HOST_IP,
+  HOST_SSH_PORT,
+  ID_RSA,
+  ID_RSA_PUB,
+  HOST_WORKDIR,
+} = config;
+
+const ID_RSA_DIR = '/.ssh';
+const ID_RSA_FILE = `${ID_RSA_DIR}/id_rsa`;
+const ID_RSA_PUB_FILE = `${ID_RSA_DIR}/id_rsa.pub`;
+async function writeSSHKey() {
+  const shell = `
+  [ ! -d "${ID_RSA_DIR}" ] && mkdir "${ID_RSA_DIR}" ;
+  echo "${ID_RSA}" > "${ID_RSA_FILE}" ;
+  echo "${ID_RSA_PUB}" > "${ID_RSA_PUB_FILE}"
+  `;
+  return new Promise((resolve, reject) => {
+    const proc = spawn('bash', ['-xc', shell]);
+    proc.on('close', (code) => {
+      if (!code) {
+        resolve(code);
+      } else {
+        reject(code);
+      }
+    });
+  });
+}
 
 module.exports = async function executeBuild({ query, repo }) {
   const { ref, repository: { git_http_url: gitHttpUrl } } = repo;
@@ -17,8 +44,16 @@ module.exports = async function executeBuild({ query, repo }) {
     return Promise.resolve();
   }
 
+  try {
+    await writeSSHKey();
+  } catch (error) {
+    console.error('failed to writeSSHKey, error: ', error);
+    return Promise.reject(error);
+  }
+
   const shellProgram = `
-    cd "${DATA_VOLUME}"
+    [ -d "${HOST_WORKDIR}" ] || mkdir "${HOST_WORKDIR}"
+    cd "${HOST_WORKDIR}"
     if [ ! -d '${repoName}' ] ; then
       git clone "${withAuth}" "${repoName}"
       echo git clone "${withAuth}" "${repoName}"
@@ -35,7 +70,16 @@ module.exports = async function executeBuild({ query, repo }) {
 
   return new Promise((resolve, reject) => {
     console.log('executing shellProgram...');
-    const proc = spawn('bash', ['-xc', shellProgram]);
+    const proc = spawn(
+      'ssh',
+      [
+        '-o', 'StrictHostKeyChecking no',
+        '-i', `${ID_RSA_FILE}`,
+        '-p', `${HOST_SSH_PORT}`,
+        HOST_IP,
+        `bash -xc "${shellProgram}"`,
+      ],
+    );
     proc.stdout.on('data', (data) => {
       console.log('stdout: ', (data || '').toString());
     });

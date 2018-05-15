@@ -21,6 +21,11 @@ services:
       - FIRE_HOUR=10
       - FIRE_MINUTE=0
       - FIRE_SECOND=0
+      - HOST_IP=${HOST_IP}
+      - HOST_SSH_PORT=${HOST_SSH_PORT}
+      - ID_RSA=${ID_RSA}
+      - ID_RSA_PUB=${ID_RSA_PUB}
+      - HOST_WORKDIR=${HOST_WORKDIR}
     depends_on:
       - redis
 
