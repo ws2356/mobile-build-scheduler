@@ -15,7 +15,6 @@ services:
     ports:
       - "3000:80"
     environment:
-      - DATA_VOLUME=/repos
       - PORT=80
       - REDIS_HOST=redis
       - FIRE_HOUR=10
@@ -32,6 +31,4 @@ services:
 
 volumes:
   redis:
-    external: true
-  repos:
     external: true

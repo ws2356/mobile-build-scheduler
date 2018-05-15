@@ -71,7 +71,14 @@ module.exports = async function executeBuild({ query, repo }) {
 
   return new Promise((resolve, reject) => {
     console.log('executing shellProgram: %s', shellProgram);
-    console.log('ID_RSA_FILE: %s, HOST_SSH_PORT: %s, HOST_IP: %s, HOST_USER: %s', ID_RSA_FILE, HOST_SSH_PORT, HOST_IP, HOST_USER);
+    console.log(
+      'ID_RSA_FILE: %s, HOST_SSH_PORT: %s, HOST_IP: %s, HOST_USER: %s, HOST_WORKDIR: %s',
+      ID_RSA_FILE,
+      HOST_SSH_PORT,
+      HOST_IP,
+      HOST_USER,
+      HOST_WORKDIR,
+     );
     const proc = spawn(
       'ssh',
       [

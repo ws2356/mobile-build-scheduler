@@ -1,5 +1,4 @@
 const {
-  DATA_VOLUME,
   REDIS_HOST,
   FIRE_HOUR = 10,
   FIRE_MINUTE = 15,
@@ -14,7 +13,6 @@ const {
 } = process.env;
 
 module.exports = {
-  DATA_VOLUME,
   REDIS_HOST,
   FIRE_HOUR,
   FIRE_MINUTE,
