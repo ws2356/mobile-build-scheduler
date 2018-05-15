@@ -20,7 +20,7 @@ async function writeSSHKey() {
   echo "${ID_RSA_PUB}" > "${ID_RSA_PUB_FILE}"
   `;
   try {
-    await Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const proc = spawn('bash', ['-xc', shell]);
       proc.on('close', (code) => {
         if (!code) {
