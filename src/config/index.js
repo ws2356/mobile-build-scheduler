@@ -10,6 +10,7 @@ const {
   ID_RSA,
   ID_RSA_PUB,
   HOST_WORKDIR,
+  HOST_USER,
 } = process.env;
 
 module.exports = {
@@ -24,4 +25,5 @@ module.exports = {
   HOST_WORKDIR,
   ID_RSA,
   ID_RSA_PUB,
+  HOST_USER,
 };

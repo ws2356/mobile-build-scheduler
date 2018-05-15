@@ -20,5 +20,9 @@ if [ -z "${HOST_IP}" ] ; then
     export HOST_IP=`ip addr show dev eth0 | sed -nr 's/^[[:space:]]*inet[[:space:]]+([^/]+).+$/\1/p'`
   fi
 fi
+if [ -z "HOST_USER" ] ; then
+  export HOST_USER=`whoami`
+fi
+env
 docker-compose up "$@"
 

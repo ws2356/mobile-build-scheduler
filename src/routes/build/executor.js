@@ -6,6 +6,7 @@ const {
   ID_RSA,
   ID_RSA_PUB,
   HOST_WORKDIR,
+  HOST_USER,
 } = config;
 
 const ID_RSA_DIR = '/.ssh';
@@ -69,14 +70,15 @@ module.exports = async function executeBuild({ query, repo }) {
   `;
 
   return new Promise((resolve, reject) => {
-    console.log('executing shellProgram...');
+    console.log('executing shellProgram: %s', shellProgram);
+    console.log('ID_RSA_FILE: %s, HOST_SSH_PORT: %s, HOST_IP: %s, HOST_USER: %s', ID_RSA_FILE, HOST_SSH_PORT, HOST_IP, HOST_USER);
     const proc = spawn(
       'ssh',
       [
         '-o', 'StrictHostKeyChecking no',
         '-i', `${ID_RSA_FILE}`,
         '-p', `${HOST_SSH_PORT}`,
-        HOST_IP,
+        `${HOST_USER}@${HOST_IP}`,
         `bash -xc "${shellProgram}"`,
       ],
     );

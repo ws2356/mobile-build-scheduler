@@ -26,6 +26,7 @@ services:
       - ID_RSA=${ID_RSA}
       - ID_RSA_PUB=${ID_RSA_PUB}
       - HOST_WORKDIR=${HOST_WORKDIR}
+      - HOST_USER=${HOST_USER}
     depends_on:
       - redis
 
