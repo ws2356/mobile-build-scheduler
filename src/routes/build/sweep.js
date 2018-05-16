@@ -1,16 +1,15 @@
 const {
   redisClient,
-  BUILD_REQ_LIST_KEY,
   shift,
   at,
 } = require('../../model/build_req_list');
+const { BUILD_REQ_LIST_MAINTAIN_KEY } = require('./lock_key');
 
 const {
   SWEEP_INTERVAL = 3600000,
   STALE_DURATION = 86400000,
 } = config;
 
-const BUILD_REQ_LIST_MAINTAIN_KEY = `${BUILD_REQ_LIST_KEY}:maintaining`;
 
 async function maintain() {
   const now = Date.now();

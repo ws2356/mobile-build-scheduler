@@ -72,14 +72,11 @@ module.exports = async function executeBuild({ query, repo }) {
     cd "${HOST_WORKDIR}"
     if [ ! -d '${repoName}' ] ; then
       git clone "${withAuth}" "${repoName}"
-      echo git clone "${withAuth}" "${repoName}"
     fi
     cd "${repoName}"
     pwd
     git reset --hard
     git checkout "${branchOrTag}"
-    git branch
-    echo "executing shell: ${actions}"
     export REF="${branchOrTag}"
     ${actions}
   `;

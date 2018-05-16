@@ -2,6 +2,12 @@ const express = require('express');
 const executeBuild = require('./executor');
 const buildList = require('../../model/build_req_list');
 require('./schedule');
+const { BUILD_REQ_LIST_MAINTAIN_KEY } = require('./lock_key');
+
+const {
+  redisClient,
+  shift,
+} = require('../../model/build_req_list');
 
 const router = express.Router();
 
@@ -36,5 +42,41 @@ async function handleTask(req, res) {
 }
 
 router.post('/', wrapAsync(handleTask));
+router.put('/clear', wrapAsync(async (req, res) => {
+  const MAX_RETRY_TIME = 600000;
+  const RETRY_WAIT_INTERVAL = 5000;
+  let retryTime = 0;
+  let done = false;
+  do {
+    const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, 'is maintaining');
+    if (ok) {
+      while (true) {
+        try {
+          const one = shift();
+          if (!one) {
+            done = true;
+            break;
+          }
+        } catch (error) {
+          done = true;
+          res.status(500).end(error ? error.toString() : 'unkown error');
+          break;
+        }
+      }
+      await redisClient.delAsync(BUILD_REQ_LIST_MAINTAIN_KEY);
+    } else {
+      await new Promise((resolve) => {
+        setTimeout(resolve, RETRY_WAIT_INTERVAL);
+      });
+      retryTime += RETRY_WAIT_INTERVAL;
+    }
+  } while (retryTime < MAX_RETRY_TIME && !done);
+
+  if (done) {
+    res.end('ok');
+  } else {
+    res.status(500).end('get lock timeout');
+  }
+}));
 
 module.exports = router;
