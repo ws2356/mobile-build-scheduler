@@ -27,7 +27,7 @@ async function handleTask(req, res) {
 
   if (urgent) {
     try {
-      executeBuild({ query, repo });
+      await executeBuild({ query, repo });
       res.end('request handled');
     } catch (error) {
       res.status(500).end(`request failed: ${error}`);
