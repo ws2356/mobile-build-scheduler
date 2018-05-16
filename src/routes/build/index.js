@@ -28,10 +28,10 @@ async function handleTask(req, res) {
   if (urgent) {
     try {
       await executeBuild({ query, repo });
-      res.end('request handled');
     } catch (error) {
-      res.status(500).end(`request failed: ${error}`);
+      console.error('failed to executeBuild, error: ', error);
     }
+    res.end('request handled');
     return;
   }
 
