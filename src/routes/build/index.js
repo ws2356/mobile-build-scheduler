@@ -1,4 +1,5 @@
 const express = require('express');
+const executeBuild = require('./executor');
 const buildList = require('../../model/build_req_list');
 require('./schedule');
 
@@ -12,9 +13,15 @@ async function handleTask(req, res) {
     return;
   }
 
-  const { access_token: accessToken, account } = query;
+  const { access_token: accessToken, account, urgent } = query;
   if (!accessToken || !account) {
     res.status(400).end('need auth');
+    return;
+  }
+
+  if (urgent) {
+    executeBuild({ query, repo });
+    res.end('request handled');
     return;
   }
 
