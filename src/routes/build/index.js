@@ -52,7 +52,7 @@ router.put('/clear', wrapAsync(async (req, res) => {
     if (ok) {
       while (true) {
         try {
-          const one = shift();
+          const one = await shift();
           if (!one) {
             done = true;
             break;
