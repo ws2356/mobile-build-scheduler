@@ -6,7 +6,7 @@ const {
 } = require('../../model/build_req_list');
 
 const {
-  SWEEP_INTERVAL = 60000,
+  SWEEP_INTERVAL = 3600000,
   STALE_DURATION = 86400000,
 } = config;
 
