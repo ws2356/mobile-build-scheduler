@@ -47,30 +47,35 @@ router.put('/clear', wrapAsync(async (req, res) => {
   const RETRY_WAIT_INTERVAL = 5000;
   let retryTime = 0;
   let done = false;
-  do {
-    const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, 'is maintaining');
-    if (ok) {
-      while (true) {
-        try {
-          const one = await shift();
-          if (!one) {
+  try {
+    do {
+      const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, 'is maintaining');
+      if (ok) {
+        while (true) {
+          try {
+            const one = await shift();
+            if (!one) {
+              done = true;
+              break;
+            }
+          } catch (error) {
             done = true;
+            res.status(500).end(error ? error.toString() : 'failed to shift');
             break;
           }
-        } catch (error) {
-          done = true;
-          res.status(500).end(error ? error.toString() : 'unkown error');
-          break;
         }
+        await redisClient.delAsync(BUILD_REQ_LIST_MAINTAIN_KEY);
+      } else {
+        await new Promise((resolve) => {
+          setTimeout(resolve, RETRY_WAIT_INTERVAL);
+        });
+        retryTime += RETRY_WAIT_INTERVAL;
       }
-      await redisClient.delAsync(BUILD_REQ_LIST_MAINTAIN_KEY);
-    } else {
-      await new Promise((resolve) => {
-        setTimeout(resolve, RETRY_WAIT_INTERVAL);
-      });
-      retryTime += RETRY_WAIT_INTERVAL;
-    }
-  } while (retryTime < MAX_RETRY_TIME && !done);
+    } while (retryTime < MAX_RETRY_TIME && !done);
+  } catch (error) {
+    res.status(500).end('unkown error');
+    return;
+  }
 
   if (done) {
     res.end('ok');
