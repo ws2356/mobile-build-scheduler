@@ -34,9 +34,14 @@ async function maintain() {
 }
 
 module.exports = async function sweep() {
-  const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, 'is maintaining');
+  if (config.app.status === 'closing') {
+    return;
+  }
+  const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, APP.id);
   if (ok) {
-    await maintain();
+    if (config.app.status === 'closing') {
+      await maintain();
+    }
     await redisClient.delAsync(BUILD_REQ_LIST_MAINTAIN_KEY);
   }
   setTimeout(sweep, SWEEP_INTERVAL);

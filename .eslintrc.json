@@ -4,7 +4,8 @@
         "config": false,
         "wrapAsync": false,
         "_": false,
-        "appInfo": false
+        "appInfo": false,
+        "APP": false
     },
     "rules": {
         "global-require": "off",

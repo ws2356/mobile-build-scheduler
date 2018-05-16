@@ -53,9 +53,9 @@ router.put('/clear', wrapAsync(async (req, res) => {
   let done = false;
   try {
     do {
-      const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, 'is maintaining');
+      const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, APP.id);
       if (ok) {
-        while (true) {
+        while (true && APP.status !== 'closing') {
           try {
             const one = await shift();
             if (!one) {
@@ -75,7 +75,7 @@ router.put('/clear', wrapAsync(async (req, res) => {
         });
         retryTime += RETRY_WAIT_INTERVAL;
       }
-    } while (retryTime < MAX_RETRY_TIME && !done);
+    } while (retryTime < MAX_RETRY_TIME && !done && APP.status !== 'closing');
   } catch (error) {
     res.status(500).end('unkown error');
     return;

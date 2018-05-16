@@ -102,5 +102,9 @@ module.exports = async function executeBuild({ query, repo }) {
         reject(code);
       }
     });
+    process.on('SIGTERM', () => {
+      proc.kill();
+      resolve('SIGTERM');
+    });
   });
 };

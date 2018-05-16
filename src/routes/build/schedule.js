@@ -36,6 +36,9 @@ function run() {
     try {
       const reqs = await buildList.all();
       for (const repoStr of reqs) {
+        if (APP.status === 'closing') {
+          break;
+        }
         let repoObj = {};
         try {
           repoObj = JSON.parse(repoStr);
