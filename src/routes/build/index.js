@@ -26,12 +26,12 @@ async function handleTask(req, res) {
   }
 
   if (urgent) {
+    res.end('request handled');
     try {
       await executeBuild({ query, repo });
     } catch (error) {
       console.error('failed to executeBuild, error: ', error);
     }
-    res.end('request handled');
     return;
   }
 
