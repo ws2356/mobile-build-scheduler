@@ -42,7 +42,7 @@ async function handleTask(req, res) {
 }
 
 router.post('/', wrapAsync(handleTask));
-router.post('/clear', wrapAsync(async (req, res) => {
+router.put('/clear', wrapAsync(async (req, res) => {
   const MAX_RETRY_TIME = 600000;
   const RETRY_WAIT_INTERVAL = 5000;
   let retryTime = 0;
