@@ -76,8 +76,6 @@ module.exports = async function executeBuild({ query, repo }) {
     cd "${repoName}"
     pwd
     git reset --hard
-    git checkout "${branchOrTag}"
-    export REF="${branchOrTag}"
     ${actions}
   `;
 
