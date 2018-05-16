@@ -21,7 +21,7 @@ else
 fi
 
 if [ -z "${HOST_IP}" ] ; then
-  if [ "x`uname -o | grep -i 'darwin'`" != "x" ] ; then
+  if [ "x`uname -a | grep -i 'darwin'`" != "x" ] ; then
     export HOST_IP=`ipconfig getifaddr en0`
   else
     export HOST_IP=`ip addr show dev eth0 | sed -nr 's/^[[:space:]]*inet[[:space:]]+([^/]+).+$/\1/p'`
@@ -31,5 +31,6 @@ if [ -z "$HOST_USER" ] ; then
   export HOST_USER=`whoami`
 fi
 env
+
 docker-compose up "$@"
 

@@ -15,8 +15,8 @@ services:
     environment:
       - PORT=80
       - REDIS_HOST=redis
-      - FIRE_HOUR=10
-      - FIRE_MINUTE=0
+      - FIRE_HOUR=7
+      - FIRE_MINUTE=42
       - FIRE_SECOND=0
       - HOST_IP=${HOST_IP}
       - HOST_SSH_PORT=${HOST_SSH_PORT}
