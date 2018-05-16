@@ -68,13 +68,13 @@ module.exports = async function executeBuild({ query, repo }) {
   }
 
   const shellProgram = `
+    set -e
     [ -d "${HOST_WORKDIR}" ] || mkdir "${HOST_WORKDIR}"
     cd "${HOST_WORKDIR}"
     if [ ! -d '${repoName}' ] ; then
       git clone "${withAuth}" "${repoName}"
     fi
     cd "${repoName}"
-    pwd
     git reset --hard
     ${actions}
   `;
