@@ -1,0 +1,3 @@
+#! /bin/sh
+docker-compose down
+docker rmi mobile-build-scheduler_mobile_build_scheduler:latest
