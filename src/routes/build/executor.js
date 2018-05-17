@@ -45,6 +45,8 @@ async function writeSSHKey() {
   return Promise.resolve(0);
 }
 
+const buildStatus = {};
+
 module.exports = async function executeBuild({ query, repo }) {
   const { ref, repository: { git_http_url: gitHttpUrl } } = repo;
   const { actions, access_token: accessToken, account } = query;
@@ -81,6 +83,8 @@ module.exports = async function executeBuild({ query, repo }) {
 
   return new Promise((resolve, reject) => {
     console.log('executing shellProgram: %s', shellProgram);
+    buildStatus.data = {};
+    Object.assign(buildStatus.data, { query, repo });
     const proc = spawn(
       'ssh',
       [
@@ -95,6 +99,7 @@ module.exports = async function executeBuild({ query, repo }) {
       console.log('stdout: ', (data || '').toString());
     });
     proc.on('close', (code, signal) => {
+      buildStatus.data = {};
       console.log('shellProgram did close, code, signal: ', code, signal);
       if (!code) {
         resolve(code);
@@ -108,3 +113,5 @@ module.exports = async function executeBuild({ query, repo }) {
     });
   });
 };
+
+module.exports.buildStatus = buildStatus;

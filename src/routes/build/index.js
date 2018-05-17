@@ -88,7 +88,7 @@ router.put('/clear', wrapAsync(async (req, res) => {
   }
 }));
 
-router.get('/', wrapAsync(async (req, res) => {
+router.get('/list', wrapAsync(async (req, res) => {
   try {
     const ret = [];
     const reqs = await buildList.all();
@@ -110,4 +110,9 @@ router.get('/', wrapAsync(async (req, res) => {
   }
 }));
 
+router.get('/status', wrapAsync(async (req, res) => {
+  const { data = {} } = executeBuild.buildStatus;
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify(data));
+}));
 module.exports = router;
