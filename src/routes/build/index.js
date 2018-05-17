@@ -88,4 +88,26 @@ router.put('/clear', wrapAsync(async (req, res) => {
   }
 }));
 
+router.get('/', wrapAsync(async (req, res) => {
+  try {
+    const ret = [];
+    const reqs = await buildList.all();
+    for (const repoStr of reqs) {
+      let repoObj = {};
+      try {
+        repoObj = JSON.parse(repoStr);
+      } catch (e) {
+        console.error('failed to json parse repoStr, error: ', e);
+        continue;
+      }
+      ret.push(repoObj);
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(ret));
+  } catch (e) {
+    console.error(e);
+    res.status(500).end(e);
+  }
+}));
+
 module.exports = router;
