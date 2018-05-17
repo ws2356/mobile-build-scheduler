@@ -14,3 +14,5 @@ global.APP = {
   id: uuidv4(),
   status: 'starting',
 }; // started, closing
+
+console.log('APP: %s', JSON.stringify(APP, null, 4));
