@@ -108,6 +108,7 @@ module.exports = async function executeBuild({ query, repo }) {
       }
     });
     process.on('SIGTERM', () => {
+      buildStatus.data = {};
       proc.kill();
       resolve('SIGTERM');
     });
