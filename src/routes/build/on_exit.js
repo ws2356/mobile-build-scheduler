@@ -3,7 +3,7 @@ const {
 } = require('../../model/build_req_list');
 const { BUILD_REQ_LIST_MAINTAIN_KEY } = require('./lock_key');
 
-process.on('SIGTERM', async () => {
+async function gracefulShutdown() {
   APP.status = 'closing';
   try {
     console.log('closing: get maintainer');
@@ -19,4 +19,7 @@ process.on('SIGTERM', async () => {
     console.log('closing: failed with error: ', error && error.message);
     process.exit(-1);
   }
-});
+}
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
