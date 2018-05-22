@@ -63,8 +63,9 @@ router.put('/clear', wrapAsync(async (req, res) => {
 
 router.get('/list', wrapAsync(async (req, res) => {
   try {
-    const ret = { queued: [], executing: [] };
-    const reqs = await buildList.all(utils.getTodayListKey());
+    const todayKey = utils.getTodayListKey();
+    const ret = { todayKey, queued: [], executing: [] };
+    const reqs = await buildList.all(todayKey);
     const execs = await buildList.all(BUILD_EXEC_LIST_KEY);
     for (const [list, dest] of [[reqs, ret.queued], [execs, ret.executing]]) {
       for (const repoStr of list) {
