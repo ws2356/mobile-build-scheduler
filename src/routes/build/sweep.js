@@ -1,48 +1,44 @@
 const {
+  BUILD_REQ_LIST_KEY,
+  BUILD_EXEC_LIST_KEY,
   redisClient,
-  shift,
-  at,
+  all,
 } = require('../../model/build_req_list');
-const { BUILD_REQ_LIST_MAINTAIN_KEY } = require('./lock_key');
 
 const {
   SWEEP_INTERVAL = 3600000,
-  STALE_DURATION = 86400000,
 } = config;
-
-
-async function maintain() {
-  const now = Date.now();
-  try {
-    while (true) {
-      const req = await at(0);
-      if (!req) {
-        break;
-      }
-      const { repo: { created_at: createdAt } } = JSON.parse(req);
-      if (now - createdAt > STALE_DURATION) {
-        console.log('sweep: stale remove');
-        await shift();
-      } else {
-        console.log('sweep: not stale, stop sweep');
-        break;
-      }
-    }
-  } catch (error) {
-    console.error(error);
-  }
-}
 
 module.exports = async function sweep() {
   if (APP.status === 'closing') {
     return;
   }
-  const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, APP.id);
-  if (ok) {
-    if (APP.status === 'closing') {
-      await maintain();
+
+  try {
+    const allReqs = await all();
+    const allExecuted = await all(BUILD_EXEC_LIST_KEY);
+    for (const [list, key] of [[allReqs, BUILD_REQ_LIST_KEY], [allExecuted, BUILD_EXEC_LIST_KEY]]) {
+      for (const it of list) {
+        if (APP.status === 'closing') {
+          return;
+        }
+        let repoObj = {};
+        try {
+          repoObj = JSON.parse(it);
+        } catch (e) {
+          console.error('failed to json parse repoStr, error: ', e);
+          continue;
+        }
+        const { repo } = repoObj;
+        const { created_at: updatedAt } = repo;
+        if (Date.now() - updatedAt <= 48 * 3600 * 1000) {
+          continue;
+        }
+        await redisClient.lremAsync(key, 1, it);
+      }
     }
-    await redisClient.delAsync(BUILD_REQ_LIST_MAINTAIN_KEY);
+  } catch (error) {
+    console.error(error);
   }
   setTimeout(sweep, SWEEP_INTERVAL);
 };

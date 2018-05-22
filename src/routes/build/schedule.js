@@ -1,35 +1,11 @@
 const moment = require('moment');
 const buildList = require('../../model/build_req_list');
 const executeBuild = require('./executor');
+const utils = require('../../utils');
 require('./sweep')();
 
-const {
-  FIRE_HOUR,
-  FIRE_MINUTE,
-  FIRE_MILLISECOND,
-  FIRE_SECOND,
-} = config;
-
 function run() {
-  const now = new Date();
-  const { nextTime, prevTime } = (() => {
-    const nextTime = new Date(now.getTime());
-    nextTime.setUTCHours(FIRE_HOUR);
-    nextTime.setUTCMinutes(FIRE_MINUTE);
-    nextTime.setUTCSeconds(FIRE_SECOND);
-    nextTime.setUTCMilliseconds(FIRE_MILLISECOND);
-
-    const prevTime = new Date(nextTime.getTime());
-    prevTime.setUTCDate(prevTime.getUTCDate() - 1);
-
-    const isPassed = nextTime <= now;
-    if (isPassed) {
-      nextTime.setUTCDate(nextTime.getUTCDate() + 1);
-      prevTime.setUTCDate(prevTime.getUTCDate() + 1);
-    }
-
-    return { nextTime, prevTime };
-  })();
+  const { nextTime, prevTime, now } = utils.getTodayRange();
 
   async function execute() {
     console.log('is executing schedule, now: ', new Date());
@@ -46,17 +22,32 @@ function run() {
           console.error('failed to json parse repoStr, error: ', e);
           continue;
         }
-        const { query, repo } = repoObj;
+        const { repo } = repoObj;
         const { created_at: updatedAt } = repo;
         if (updatedAt < prevTime) {
           continue;
         }
-        await executeBuild({ query, repo });
+
+        try {
+          const didPick = await buildList.redisClient.lremAsync(
+            buildList.BUILD_REQ_LIST_KEY,
+            1,
+            repoStr,
+          );
+          if (!didPick) {
+            // 其他服务器消费了这个item
+            continue;
+          }
+          await buildList.push(repoStr, buildList.BUILD_EXEC_LIST_KEY);
+        } catch (error) {
+          console.error(error);
+        }
       }
     } catch (e) {
       console.error(e);
     }
 
+    executeBuild();
     run();
   }
 
@@ -71,4 +62,5 @@ function run() {
   setTimeout(execute, Math.max(0, countdown));
 }
 
+executeBuild();
 run();

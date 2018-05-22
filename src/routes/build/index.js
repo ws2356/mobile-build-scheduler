@@ -2,12 +2,13 @@ const express = require('express');
 const executeBuild = require('./executor');
 const buildList = require('../../model/build_req_list');
 require('./schedule');
-const { BUILD_REQ_LIST_MAINTAIN_KEY } = require('./lock_key');
 
 const {
+  BUILD_REQ_LIST_KEY,
+  BUILD_EXEC_LIST_KEY,
   redisClient,
-  shift,
-} = require('../../model/build_req_list');
+  all,
+} = buildList;
 
 const router = express.Router();
 
@@ -28,7 +29,8 @@ async function handleTask(req, res) {
   if (urgent) {
     res.end('request handled');
     try {
-      await executeBuild({ query, repo });
+      await buildList.push({ query, repo }, BUILD_EXEC_LIST_KEY);
+      executeBuild();
     } catch (error) {
       console.error('failed to executeBuild, error: ', error);
     }
@@ -47,60 +49,34 @@ async function handleTask(req, res) {
 
 router.post('/', wrapAsync(handleTask));
 router.put('/clear', wrapAsync(async (req, res) => {
-  const MAX_RETRY_TIME = 600000;
-  const RETRY_WAIT_INTERVAL = 5000;
-  let retryTime = 0;
-  let done = false;
   try {
-    do {
-      const ok = await redisClient.setnxAsync(BUILD_REQ_LIST_MAINTAIN_KEY, APP.id);
-      if (ok) {
-        while (true && APP.status !== 'closing') {
-          try {
-            const one = await shift();
-            if (!one) {
-              done = true;
-              break;
-            }
-          } catch (error) {
-            done = true;
-            res.status(500).end(error ? error.toString() : 'failed to shift');
-            break;
-          }
-        }
-        await redisClient.delAsync(BUILD_REQ_LIST_MAINTAIN_KEY);
-      } else {
-        await new Promise((resolve) => {
-          setTimeout(resolve, RETRY_WAIT_INTERVAL);
-        });
-        retryTime += RETRY_WAIT_INTERVAL;
-      }
-    } while (retryTime < MAX_RETRY_TIME && !done && APP.status !== 'closing');
+    const allReqs = await all();
+    for (const it of allReqs) {
+      await redisClient.lremAsync(BUILD_REQ_LIST_KEY, 1, it);
+    }
   } catch (error) {
     res.status(500).end('unkown error');
     return;
   }
-
-  if (done) {
-    res.end('ok');
-  } else {
-    res.status(500).end('get lock timeout');
-  }
+  res.end('ok');
 }));
 
 router.get('/list', wrapAsync(async (req, res) => {
   try {
-    const ret = [];
+    const ret = { queued: [], executing: [] };
     const reqs = await buildList.all();
-    for (const repoStr of reqs) {
-      let repoObj = {};
-      try {
-        repoObj = JSON.parse(repoStr);
-      } catch (e) {
-        console.error('failed to json parse repoStr, error: ', e);
-        continue;
+    const execs = await buildList.all(BUILD_EXEC_LIST_KEY);
+    for (const [list, dest] of [[reqs, ret.queued], [execs, ret.executing]]) {
+      for (const repoStr of list) {
+        let repoObj = {};
+        try {
+          repoObj = JSON.parse(repoStr);
+        } catch (e) {
+          console.error('failed to json parse repoStr, error: ', e);
+          continue;
+        }
+        dest.push(repoObj);
       }
-      ret.push(repoObj);
     }
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(ret));
@@ -110,9 +86,4 @@ router.get('/list', wrapAsync(async (req, res) => {
   }
 }));
 
-router.get('/status', wrapAsync(async (req, res) => {
-  const { data = {} } = executeBuild.buildStatus;
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(data));
-}));
 module.exports = router;
