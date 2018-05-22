@@ -113,7 +113,7 @@ async function executeBuildImp({ query, repo }) {
 
 let isExecuting = false;
 let isUpdated = false;
-module.export = async function executeBuild() {
+module.exports = async function executeBuild() {
   if (isExecuting) {
     isUpdated = true;
     return;

@@ -6,7 +6,7 @@ const {
 } = config;
 
 
-module.export = {
+module.exports = {
   getTodayRange() {
     return (() => {
       const now = new Date();
