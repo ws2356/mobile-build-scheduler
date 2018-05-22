@@ -5,6 +5,7 @@ const {
   FIRE_SECOND,
 } = config;
 
+
 module.export = {
   getTodayRange() {
     return (() => {
@@ -26,5 +27,10 @@ module.export = {
 
       return { nextTime, prevTime, now };
     })();
+  },
+
+  getTodayListKey() {
+    const { nextTime } = this.getTodayRange();
+    return `${appInfo.name}:build_list:${nextTime}`;
   },
 };

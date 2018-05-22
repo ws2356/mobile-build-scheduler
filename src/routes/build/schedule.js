@@ -2,15 +2,16 @@ const moment = require('moment');
 const buildList = require('../../model/build_req_list');
 const executeBuild = require('./executor');
 const utils = require('../../utils');
-require('./sweep')();
 
 function run() {
+  executeBuild();
   const { nextTime, prevTime, now } = utils.getTodayRange();
+  const todayListKey = utils.getTodayListKey();
 
   async function execute() {
     console.log('is executing schedule, now: ', new Date());
     try {
-      const reqs = await buildList.all();
+      const reqs = await buildList.all(todayListKey);
       for (const repoStr of reqs) {
         if (APP.status === 'closing') {
           break;
@@ -30,7 +31,7 @@ function run() {
 
         try {
           const didPick = await buildList.redisClient.lremAsync(
-            buildList.BUILD_REQ_LIST_KEY,
+            todayListKey,
             1,
             repoStr,
           );
@@ -47,7 +48,6 @@ function run() {
       console.error(e);
     }
 
-    executeBuild();
     run();
   }
 
@@ -62,5 +62,4 @@ function run() {
   setTimeout(execute, Math.max(0, countdown));
 }
 
-executeBuild();
 run();

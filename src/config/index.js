@@ -10,8 +10,7 @@ const {
   ID_RSA_PUB,
   HOST_WORKDIR,
   HOST_USER,
-  SWEEP_INTERVAL = 3600000,
-  STALE_DURATION = 86400000,
+  BUILD_LIST_EXPIRE_TIME = 48 * 3600,
 } = process.env;
 
 module.exports = {
@@ -26,6 +25,5 @@ module.exports = {
   ID_RSA,
   ID_RSA_PUB,
   HOST_USER,
-  SWEEP_INTERVAL,
-  STALE_DURATION,
+  BUILD_LIST_EXPIRE_TIME,
 };

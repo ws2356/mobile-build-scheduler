@@ -1,10 +1,10 @@
 const express = require('express');
 const executeBuild = require('./executor');
 const buildList = require('../../model/build_req_list');
+const utils = require('../../utils');
 require('./schedule');
 
 const {
-  BUILD_REQ_LIST_KEY,
   BUILD_EXEC_LIST_KEY,
   redisClient,
   all,
@@ -39,7 +39,7 @@ async function handleTask(req, res) {
 
   try {
     repo.created_at = Date.now();
-    await buildList.push({ query, repo });
+    await buildList.push({ query, repo }, utils.todayListKey());
     res.end('request handled');
   } catch (e) {
     console.error('failed to update webhook request, error: ', repo, e);
@@ -49,22 +49,22 @@ async function handleTask(req, res) {
 
 router.post('/', wrapAsync(handleTask));
 router.put('/clear', wrapAsync(async (req, res) => {
+  const todayListKey = utils.getTodayListKey();
   try {
-    const allReqs = await all();
+    const allReqs = await all(todayListKey);
     for (const it of allReqs) {
-      await redisClient.lremAsync(BUILD_REQ_LIST_KEY, 1, it);
+      await redisClient.lremAsync(todayListKey, 1, it);
     }
+    res.end('ok');
   } catch (error) {
     res.status(500).end('unkown error');
-    return;
   }
-  res.end('ok');
 }));
 
 router.get('/list', wrapAsync(async (req, res) => {
   try {
     const ret = { queued: [], executing: [] };
-    const reqs = await buildList.all();
+    const reqs = await buildList.all(utils.getTodayListKey());
     const execs = await buildList.all(BUILD_EXEC_LIST_KEY);
     for (const [list, dest] of [[reqs, ret.queued], [execs, ret.executing]]) {
       for (const repoStr of list) {
